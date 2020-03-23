@@ -12,13 +12,9 @@ function App() {
   const [todos, setTodos] = useState(
     JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)) || []
   );
-
-  // useEffect(() => {
-  //   const storageTodos = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
-  //   if (storageTodos) {
-  //     setTodos(storageTodos);
-  //   }
-  // }, []);
+  const [appliedFilterFunc, setAppliedFilterFunc] = useState(() => todo =>
+    true
+  );
 
   useEffect(() => {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(todos));
@@ -27,6 +23,9 @@ function App() {
   function deleteTodo(id) {
     setTodos(todos.filter(todo => todo.id !== id));
   }
+  // function deleteTodos() {
+  //   setTodos(todos.filter(todo => todo.completed === false));
+  // }
 
   function toggleComplete(id) {
     setTodos(
@@ -42,21 +41,23 @@ function App() {
     );
   }
 
-  // function addTodo(todo) {
-  //   setTodos([todo, ...todos]);
-  // }
-
+  const filteredTodos = todos.filter(appliedFilterFunc);
   return (
-    <div className="App container w-50 my-5">
+    <div className="App container w-75 my-5">
       <Header />
-      <SubHeader countTodo={todos.filter(todo => todo.completed === false)} />
+      <SubHeader
+        countTodo={filteredTodos.filter(todo => todo.completed === false)}
+      />
       <TodoForm addTodo={todo => setTodos([todo, ...todos])} />
       <TodoList
-        todos={todos}
+        todos={filteredTodos}
         deleteTodo={deleteTodo}
         toggleComplete={toggleComplete}
       />
-      <ListFilter />
+      <ListFilter
+        filterTodos={listFilterFunc => setAppliedFilterFunc(listFilterFunc)}
+        processTodos={processTodosFunc => setTodos(processTodosFunc(todos))}
+      />
     </div>
   );
 }
